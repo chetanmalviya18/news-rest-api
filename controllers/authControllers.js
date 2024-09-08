@@ -39,7 +39,7 @@ class AuthController {
         user,
       });
     } catch (error) {
-      console.log("Error in register => ", error);
+      // console.log("Error in register => ", error);
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return res.status(400).json({ errors: error.messages });
       } else {
@@ -94,7 +94,7 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.log("Error in login => ", error);
+      // console.log("Error in login => ", error);
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return res.status(400).json({ errors: error.messages });
       } else {
