@@ -2,9 +2,24 @@ import vine, { errors } from "@vinejs/vine";
 import { newsSchema } from "../validations/newsValidation.js";
 import { generateUniqueID, imageValidator } from "../utils/helper.js";
 import prisma from "../DB/db.config.js";
+import NewsApiTranform from "../transform/tramsform.js";
 
 class NewsController {
-  static async index(req, res) {}
+  static async index(req, res) {
+    const news = await prisma.news.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            profile: true,
+          },
+        },
+      },
+    });
+    const newsTransform = news?.map((i) => NewsApiTranform.transform(i));
+    return res.json({ status: 200, news: newsTransform });
+  }
 
   static async store(req, res) {
     try {
