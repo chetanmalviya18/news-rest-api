@@ -6,7 +6,18 @@ import NewsApiTranform from "../transform/tramsform.js";
 
 class NewsController {
   static async index(req, res) {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 1;
+
+    if (page <= 0) page = 1;
+    if (limit <= 0 || limit > 100) limit = 10;
+
+    const skip = (page - 1) * limit;
+
     const news = await prisma.news.findMany({
+      take: limit,
+      skip: skip,
+
       include: {
         user: {
           select: {
@@ -18,7 +29,19 @@ class NewsController {
       },
     });
     const newsTransform = news?.map((i) => NewsApiTranform.transform(i));
-    return res.json({ status: 200, news: newsTransform });
+
+    const toatlNews = await prisma.news.count();
+    const totalPage = Math.ceil(toatlNews / limit);
+
+    return res.json({
+      status: 200,
+      news: newsTransform,
+      metadata: {
+        totalPage,
+        currentPage: page,
+        currentLimit: limit,
+      },
+    });
   }
 
   static async store(req, res) {
