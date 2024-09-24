@@ -4,6 +4,7 @@ import { imageValidator, removeImage, uploadImage } from "../utils/helper.js";
 import prisma from "../DB/db.config.js";
 import NewsApiTranform from "../transform/tramsform.js";
 import redisCache from "../DB/redis.config.js";
+import logger from "../config/logger.js";
 
 class NewsController {
   static async index(req, res) {
@@ -48,6 +49,7 @@ class NewsController {
   static async store(req, res) {
     try {
       const user = req.user;
+
       const body = req.body;
 
       const validator = vine.compile(newsSchema);
@@ -94,7 +96,7 @@ class NewsController {
         news,
       });
     } catch (error) {
-      console.log("Error in register => ", error);
+      logger.error(error?.message);
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return res.status(400).json({ errors: error.messages });
       } else {
@@ -128,6 +130,7 @@ class NewsController {
 
       return res.json({ status: 200, news: transformNews });
     } catch (error) {
+      logger.error(error?.message);
       return res.status(500).json({
         status: 500,
         message: "Something went wrong. Please try again.",
@@ -181,6 +184,7 @@ class NewsController {
 
       return res.status(200).json({ message: "News updated successfully" });
     } catch (error) {
+      logger.error(error?.message);
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return res.status(400).json({ errors: error.messages });
       } else {
@@ -191,6 +195,7 @@ class NewsController {
       }
     }
   }
+
   static async destroy(req, res) {
     try {
       const { id } = req.params;
@@ -216,6 +221,7 @@ class NewsController {
 
       return res.status(200).json({ message: "News deleted successfully" });
     } catch (error) {
+      logger.error(error?.message);
       return res.status(500).json({
         status: 500,
         message: "Something went wrong. Please try again.",
