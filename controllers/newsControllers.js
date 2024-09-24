@@ -1,18 +1,14 @@
 import vine, { errors } from "@vinejs/vine";
 import { newsSchema } from "../validations/newsValidation.js";
-import {
-  generateUniqueID,
-  imageValidator,
-  removeImage,
-  uploadImage,
-} from "../utils/helper.js";
+import { imageValidator, removeImage, uploadImage } from "../utils/helper.js";
 import prisma from "../DB/db.config.js";
 import NewsApiTranform from "../transform/tramsform.js";
+import redisCache from "../DB/redis.config.js";
 
 class NewsController {
   static async index(req, res) {
     const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 1;
+    const limit = Number(req.query.limit) || 10;
 
     if (page <= 0) page = 1;
     if (limit <= 0 || limit > 100) limit = 10;
@@ -87,13 +83,18 @@ class NewsController {
         data: payload,
       });
 
+      //remove cache
+      redisCache.del("/api/news", (err) => {
+        if (err) throw err;
+      });
+
       return res.json({
         status: 200,
         message: "News created successfully",
         news,
       });
     } catch (error) {
-      // console.log("Error in register => ", error);
+      console.log("Error in register => ", error);
       if (error instanceof errors.E_VALIDATION_ERROR) {
         return res.status(400).json({ errors: error.messages });
       } else {
