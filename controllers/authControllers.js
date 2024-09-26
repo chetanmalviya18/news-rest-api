@@ -3,6 +3,9 @@ import { loginSchema, registerSchema } from "../validations/authValidation.js";
 import bcrypt from "bcrypt";
 import prisma from "../DB/db.config.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../config/mail.js";
+import logger from "../config/logger.js";
+import { emailQueue, emailQueueName } from "../jobs/sendEmailJob.js";
 
 class AuthController {
   static async register(req, res) {
@@ -103,6 +106,40 @@ class AuthController {
           message: "Something went wrong. Please try again.",
         });
       }
+    }
+  }
+
+  //send email
+  static async sendMail(req, res) {
+    try {
+      const { email } = req.query;
+
+      const payload = [
+        {
+          toEmail: email,
+          subject: "Hey i am just testing",
+          body: "<h1>Hello world, I am from news_backend</h1>",
+        },
+        {
+          toEmail: email,
+          subject: "Are you stduent?",
+          body: "<h1>We have amazing offers for students</h1>",
+        },
+        {
+          toEmail: email,
+          subject: "This is final",
+          body: "<h1>Finally this project will end soon</h1>",
+        },
+      ];
+
+      await emailQueue.add(emailQueueName, payload);
+
+      return res.json({ status: 200, message: "Job added successfully." });
+    } catch (error) {
+      logger.error({ type: "Email error", body: error });
+      return res
+        .status(500)
+        .json({ message: "Something went wrong. Please try again" });
     }
   }
 }

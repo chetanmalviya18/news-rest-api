@@ -16,10 +16,6 @@ class profileController {
     }
   }
 
-  static async store() {}
-
-  static async show() {}
-
   static async update(req, res) {
     try {
       const { id } = req.params;
@@ -67,8 +63,6 @@ class profileController {
         .json({ error: "Something went wrong, please try again." });
     }
   }
-
-  static async destroy() {}
 }
 
 export default profileController;

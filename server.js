@@ -5,6 +5,7 @@ import fileupload from "express-fileupload";
 import helmet from "helmet";
 import cors from "cors";
 import { limiter } from "./config/rateLimiter.js";
+import "./jobs/index.js";
 
 const app = express();
 
